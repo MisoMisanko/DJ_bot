@@ -1,6 +1,6 @@
 # DJ Bot
 
-DJ Bot is a chatbot that asks about your mood, assesses it and suggests a playlist to match. It also includes a special feature to generate a "mini Spotify Wrapped."
+DJ Bot is a chatbot that asks about your mood, assesses it and suggests a playlist to match. It also includes a special feature to generate a personally curated Spotify playlist."
 
 ## How to Run
 1. Ensure you have Python 3.10 installed.
