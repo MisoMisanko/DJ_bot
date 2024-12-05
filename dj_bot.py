@@ -35,16 +35,13 @@ class DJBot(ChatbotBase):
         emotions = processed_input["emotions"]
         general_mood = processed_input["general_mood"]
 
-        # Define the query for playlist search
         if context:
             query = f"{general_mood} {context}"
         elif general_mood == "negative" and not context:
-            # Broader query for negative moods
-            query = "sad relaxing music"
+            query = "sad relaxing music" #I had to add this, because the search often failed when I provided only "negative" with no context
         else:
             query = general_mood
 
-        # Search for a playlist
         playlist = self.search_playlist(query)
         if playlist:
             responses = [
