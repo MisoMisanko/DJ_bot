@@ -1,13 +1,12 @@
-from chatbot_base import ChatbotBase
 from textblob import TextBlob
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import random
 
 
-class DJBot(ChatbotBase):
+class DJBot:
     def __init__(self, name="DJBot", client_id=None, client_secret=None):
-        super().__init__(name)
+        self.name = name
         self.spotify = None
         if client_id and client_secret:
             self.spotify = self.get_spotify_client(client_id, client_secret)
