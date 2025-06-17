@@ -34,31 +34,41 @@ class DJBot:
         emotions = processed_input["emotions"]
         general_mood = processed_input["general_mood"]
 
-        # === Construct query ===
+        # Prioritize first detected emotion, fallback to general mood
         if emotions:
-            primary_emotion = emotions[0]  # use first detected emotion
-            query = f"{primary_emotion} {context}" if context else primary_emotion
-        elif general_mood == "negative" and not context:
-            query = "sad relaxing music"
+            emotion_query = emotions[0].lower()
         else:
-            query = f"{general_mood} {context}" if context else general_mood
+            emotion_query = general_mood
 
-        playlist = self.search_playlist(query)
+        # Build tiered queries
+        query_attempts = []
+        if context:
+            query_attempts.append(f"{emotion_query} {context}")
+        query_attempts.append(emotion_query)
+        if general_mood != emotion_query:
+            query_attempts.append(general_mood)
+
+        # Try each query
+        playlist = None
+        for q in query_attempts:
+            playlist = self.search_playlist(q)
+            if playlist:
+                break
 
         if playlist:
             responses = [
-                f"This feels just right for your vibe. Here’s your playlist: {playlist}",
-                f"I think you'll enjoy this! Here's the playlist: {playlist}",
-                f"Got the perfect tunes for you! Check it out: {playlist}",
+                f"This feels just right for your vibe. 🎶 Here’s your playlist: {playlist}",
+                f"I think you'll enjoy this! 🎵 Here's the playlist: {playlist}",
+                f"Got the perfect tunes for you! 🎧 Check it out: {playlist}",
                 f"Here's something that matches your mood: {playlist}"
             ]
             return random.choice(responses)
         else:
             fallback_playlist = "https://open.spotify.com/playlist/37i9dQZF1DX3rxVfibe1L0"
             fallback_responses = [
-                f"I couldn’t find the perfect match, but this playlist might still hit the spot: {fallback_playlist}",
-                f"Couldn't locate the exact tunes, but give this a try: {fallback_playlist}",
-                f"Here's a playlist you might like: {fallback_playlist}"
+                f"I couldn’t find the perfect match, but this one might still hit the spot: {fallback_playlist}",
+                f"Nothing exact came up, but give this one a spin: {fallback_playlist}",
+                f"Here’s a great fallback playlist I recommend: {fallback_playlist}"
             ]
             return random.choice(fallback_responses)
 
@@ -66,7 +76,7 @@ class DJBot:
         if not self.spotify:
             return None
         try:
-            results = self.spotify.search(q=query, type="playlist", limit=1)
+            results = self.spotify.search(q=f"playlist:{query.lower()}", type="playlist", limit=1)
             if results and results.get("playlists", {}).get("items"):
                 return results["playlists"]["items"][0]["external_urls"]["spotify"]
             return None
