@@ -1,43 +1,68 @@
 import streamlit as st
 import os
-import pathlib
 from dj_bot import DJBot
 
-# === Load external CSS ===
-def load_css(css_file):
-    with open(css_file) as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-css_path = pathlib.Path("assets/styles.css")
-load_css(css_path)
-
-# === Load credentials ===
+# === Spotify credentials ===
 client_id = os.environ["SPOTIPY_CLIENT_ID"]
 client_secret = os.environ["SPOTIPY_CLIENT_SECRET"]
 
 # === Init bot ===
 bot = DJBot(client_id=client_id, client_secret=client_secret)
 
-# === Session State Setup ===
+# === Session state ===
 if 'step' not in st.session_state:
     st.session_state.step = 'mood'
-    st.session_state.response = "Hey! I’m DJ Bot. How are you feeling today? 🎧"
-    st.session_state.special_used = False
+    st.session_state.mood = ''
+    st.session_state.context = ''
     st.session_state.general_mood = ''
     st.session_state.emotions = []
+    st.session_state.special_used = False
+    st.session_state.response = "Hey! I’m DJ Bot. How are you feeling today? 🎧"
+
+if "input" not in st.session_state:
+    st.session_state.input = ""
+
+# === Style (linked to key="styledinput" and key="sendbutton") ===
+st.markdown("""
+<style>
+/* Input field styling */
+.st-key-styledinput input {
+    background-color: #f5f5f5;
+    color: #000000;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+}
+
+/* Markdown output */
+div[data-testid="stMarkdownContainer"] {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* Button styling (not used here but ready if added later) */
+.st-key-sendbutton button {
+    background-color: #1DB954;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 8px 20px;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # === Title ===
 st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 
-# === Input Form ===
-with st.form("chat_form"):
-    user_input = st.text_input("You:", label_visibility="collapsed", key="styledinput")
-    submitted = st.form_submit_button("Send", key="sendbutton")
+# === Logic handler ===
+def handle_input():
+    user_input = st.session_state.input.strip()
+    if not user_input:
+        return
 
-# === Response Handling ===
-def handle_input(text):
     if st.session_state.step == 'mood':
-        processed = bot.process_input(text)
+        processed = bot.process_input(user_input)
         st.session_state.general_mood = processed["general_mood"]
         st.session_state.emotions = processed["emotions"]
 
@@ -49,38 +74,42 @@ def handle_input(text):
             st.session_state.step = 'intent'
 
     elif st.session_state.step == 'intent':
-        if any(word in text.lower() for word in ['uplift', 'change', 'better', 'happy']):
+        if any(word in user_input.lower() for word in ['uplift', 'change', 'better', 'happy']):
             st.session_state.general_mood = 'positive'
-        elif any(word in text.lower() for word in ['stick', 'stay', 'keep']):
+        elif any(word in user_input.lower() for word in ['stick', 'stay', 'keep']):
             st.session_state.general_mood = 'negative'
         st.session_state.response = "Got it. What are you doing right now?"
         st.session_state.step = 'activity'
 
     elif st.session_state.step == 'activity':
+        st.session_state.context = user_input
         reply = bot.generate_response({
             "general_mood": st.session_state.general_mood,
             "emotions": st.session_state.emotions
-        }, context=text)
+        }, context=st.session_state.context)
         st.session_state.response = reply
         st.session_state.step = 'post_playlist'
 
     elif st.session_state.step == 'post_playlist':
-        if 'special' in text.lower() and not st.session_state.special_used:
-            st.session_state.response = f"Here’s something truly special I’ve curated just for you: {bot.mini_spotify_wrapped()}"
+        if 'special' in user_input.lower() and not st.session_state.special_used:
+            wrapped_link = bot.mini_spotify_wrapped()
+            st.session_state.response = f"Here’s something truly special I’ve curated just for you: {wrapped_link}"
             st.session_state.special_used = True
-        elif 'another' in text.lower():
+        elif 'another' in user_input.lower():
             st.session_state.step = 'mood'
             st.session_state.response = "Okay! How are you feeling now?"
-        elif 'exit' in text.lower():
+        elif 'exit' in user_input.lower():
             st.session_state.response = "Goodbye! Thanks for chatting 🎵"
             st.session_state.step = 'done'
         else:
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
-# === Process Submission ===
-if submitted and user_input.strip():
-    handle_input(user_input.strip())
+    # Clear input after handling
+    st.session_state.input = ""
 
-# === Show Bot Response ===
+# === Input field ===
+st.text_input("You:", key="input", label_visibility="collapsed", on_change=handle_input, key="styledinput")
+
+# === Output ===
 if st.session_state.response:
     st.markdown(f"**DJ Bot:** {st.session_state.response}")
