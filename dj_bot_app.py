@@ -1,5 +1,7 @@
 import streamlit as st
 import os
+from dj_bot import DJBot
+
 client_id = os.environ["SPOTIPY_CLIENT_ID"]
 client_secret = os.environ["SPOTIPY_CLIENT_SECRET"]
 
