@@ -1,2 +1,4 @@
-textblob
+streamlit>=1.33
 spotipy
+textblob
+python-dotenv

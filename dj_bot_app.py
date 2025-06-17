@@ -32,7 +32,7 @@ st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 # === Input Form ===
 with st.form("chat_form"):
     user_input = st.text_input("You:", label_visibility="collapsed", key="styledinput")
-    submitted = st.form_submit_button("Send", use_container_width=False, key="sendbutton")
+    submitted = st.form_submit_button("Send", key="sendbutton")
 
 # === Response Handling ===
 def handle_input(text):
