@@ -18,7 +18,7 @@ client_secret = os.environ["SPOTIPY_CLIENT_SECRET"]
 # === Init bot ===
 bot = DJBot(client_id=client_id, client_secret=client_secret)
 
-# === State setup ===
+# === Session State Setup ===
 if 'step' not in st.session_state:
     st.session_state.step = 'mood'
     st.session_state.response = "Hey! I’m DJ Bot. How are you feeling today? 🎧"
@@ -26,18 +26,15 @@ if 'step' not in st.session_state:
     st.session_state.general_mood = ''
     st.session_state.emotions = []
 
-if "input" not in st.session_state:
-    st.session_state.input = ""
-
 # === Title ===
 st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 
-# === Input form ===
+# === Input Form ===
 with st.form("chat_form"):
-    st.text_input("You:", value=st.session_state.input, label_visibility="collapsed", key="styledinput")
+    user_input = st.text_input("You:", label_visibility="collapsed", key="styledinput")
     submitted = st.form_submit_button("Send", use_container_width=False, key="sendbutton")
 
-# === Handle logic ===
+# === Response Handling ===
 def handle_input(text):
     if st.session_state.step == 'mood':
         processed = bot.process_input(text)
@@ -80,11 +77,10 @@ def handle_input(text):
         else:
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
-# === Execute ===
-if submitted and st.session_state.input.strip():
-    handle_input(st.session_state.input.strip())
-    st.session_state.input = ""
+# === Process Submission ===
+if submitted and user_input.strip():
+    handle_input(user_input.strip())
 
-# === Show reply ===
+# === Show Bot Response ===
 if st.session_state.response:
     st.markdown(f"**DJ Bot:** {st.session_state.response}")
