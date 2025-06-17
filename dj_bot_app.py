@@ -19,9 +19,12 @@ if 'step' not in st.session_state:
     st.session_state.special_used = False
     st.session_state.response = "Hey! I’m DJ Bot. How are you feeling today? 🎧"
 
+if "input" not in st.session_state:
+    st.session_state.input = ""
+
+# Title and styling
 st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 
-# Custom styling
 st.markdown(
     """
     <style>
@@ -46,15 +49,13 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# User Input Form
-with st.form("chat_form"):
-    user_input = st.text_input("You:", key="input", label_visibility="collapsed")
-    submitted = st.form_submit_button("Send")
-    if submitted:
-        st.session_state.input = ""  # ✅ clear input immediately inside form
+# Conversation handler
+def handle_input():
+    user_input = st.session_state.input.strip()
 
-# Handle submission
-if submitted and user_input:
+    if not user_input:
+        return
+
     if st.session_state.step == 'mood':
         processed = bot.process_input(user_input)
         st.session_state.general_mood = processed["general_mood"]
@@ -98,9 +99,11 @@ if submitted and user_input:
         else:
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
-    # ✅ Safely clear the input box after submission
-    if "input" in st.session_state:
-        st.session_state.input = ""
+    # Clear the input box
+    st.session_state.input = ""
+
+# Input field with callback
+st.text_input("You:", key="input", label_visibility="collapsed", on_change=handle_input)
 
 # Show bot response
 if st.session_state.response:
