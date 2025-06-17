@@ -10,36 +10,30 @@ client_secret = os.environ["SPOTIPY_CLIENT_SECRET"]
 # === Init bot ===
 bot = DJBot(client_id=client_id, client_secret=client_secret)
 
-# === Session state ===
-if 'step' not in st.session_state:
-    st.session_state.step = 'mood'
-    st.session_state.mood = ''
-    st.session_state.context = ''
-    st.session_state.general_mood = ''
-    st.session_state.emotions = []
-    st.session_state.special_used = False
-    st.session_state.response = "Hey! I’m DJ Bot. How are you feeling today? 🎧"
-
-if "input" not in st.session_state:
-    st.session_state.input = ""
-
+# === Load external CSS ===
 def load_css(css_file):
     css_path = pathlib.Path(css_file)
     if css_path.exists():
         with open(css_path) as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    else:
-        st.warning("⚠️ CSS file not found.")
 
 load_css("assets/styles.css")
 
-# === Title ===
-st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
+# === Session state ===
+if 'step' not in st.session_state:
+    st.session_state.step = 'mood'
+    st.session_state.response = "Hey! I’m DJ Bot. How are you feeling today? 🎧"
+    st.session_state.general_mood = ''
+    st.session_state.emotions = []
+    st.session_state.context = ''
+    st.session_state.special_used = False
+
+if "styledinput" not in st.session_state:
+    st.session_state.styledinput = ""
 
 # === Logic handler ===
-
 def handle_input():
-    user_input = st.session_state.styledinput
+    user_input = st.session_state.styledinput.strip()
     if not user_input:
         return
 
@@ -74,8 +68,7 @@ def handle_input():
 
     elif st.session_state.step == 'post_playlist':
         if 'special' in user_input.lower() and not st.session_state.special_used:
-            wrapped_link = bot.mini_spotify_wrapped()
-            st.session_state.response = f"Here’s something truly special I’ve curated just for you: {wrapped_link}"
+            st.session_state.response = f"Here’s something truly special I’ve curated just for you: {bot.mini_spotify_wrapped()}"
             st.session_state.special_used = True
         elif 'another' in user_input.lower():
             st.session_state.step = 'mood'
@@ -86,18 +79,15 @@ def handle_input():
         else:
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
-    # Clear input after handling
-    st.session_state["styledinput"] = ""
+    # Clear input field
+    st.session_state.styledinput = ""
+
+# === Title ===
+st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 
 # === Input field ===
-with st.form("chat_form", clear_on_submit=True):
-    st.text_input("You:", label_visibility="collapsed", key="styledinput")
-    submitted = st.form_submit_button("Send")
+st.text_input("You:", key="styledinput", label_visibility="collapsed", on_change=handle_input)
 
-if submitted:
-    handle_input()
-
-
-# === Output ===
+# === Response ===
 if st.session_state.response:
     st.markdown(f"**DJ Bot:** {st.session_state.response}")
