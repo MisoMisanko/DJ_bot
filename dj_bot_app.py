@@ -50,6 +50,8 @@ st.markdown(
 with st.form("chat_form"):
     user_input = st.text_input("You:", key="input", label_visibility="collapsed")
     submitted = st.form_submit_button("Send")
+    if submitted:
+        st.session_state.input = ""  # ✅ clear input immediately inside form
 
 # Handle submission
 if submitted and user_input:
