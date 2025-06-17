@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import pathlib
+import random
 from dj_bot import DJBot
 
 # === Spotify credentials ===
@@ -31,6 +32,43 @@ if 'step' not in st.session_state:
 if "styledinput" not in st.session_state:
     st.session_state.styledinput = ""
 
+# === Helper prompt variations ===
+positive_responses = [
+    "That’s great to hear! 😄",
+    "Amazing! I’m so happy for you! 🥳",
+    "Fantastic! Let’s keep the good vibes rolling! ✨"
+]
+
+activity_prompts = [
+    "What are you up to right now? Relaxing, working out, or something else?",
+    "What’s on your schedule? Chilling, exercising, or anything else?",
+    "What are you doing at the moment? Taking it easy, hitting the gym, or something else?"
+]
+
+negative_responses = [
+    "I’m sorry to hear that. 😔",
+    "Oh no, that sounds rough. 💔",
+    "I’m here for you. Let’s make it better. 🌧️"
+]
+
+intent_prompts = [
+    "Should we stick with this mood or try to brighten things up?",
+    "Do you want to stay in this feeling or find something uplifting?",
+    "Would you prefer to keep this vibe or try to turn it around?"
+]
+
+another_prompts = [
+    "Want to explore another playlist, or check out something special I’ve curated just for you?",
+    "Would you like another playlist, or something unique I’ve crafted especially for you?",
+    "Ready for another playlist, or want to see something truly special?"
+]
+
+retry_prompts = [
+    "Type 'another' for a new playlist, 'special' for your special one, or 'exit'.",
+    "Let me know if you want 'another', something 'special', or just 'exit'.",
+    "Need more music? Say 'another', 'special', or 'exit'."
+]
+
 # === Logic handler ===
 def handle_input():
     user_input = st.session_state.styledinput.strip()
@@ -43,10 +81,10 @@ def handle_input():
         st.session_state.emotions = processed["emotions"]
 
         if st.session_state.general_mood == "positive":
-            st.session_state.response = "That’s great to hear! 😊 What are you doing right now?"
+            st.session_state.response = f"{random.choice(positive_responses)}\n{random.choice(activity_prompts)}"
             st.session_state.step = 'activity'
         else:
-            st.session_state.response = "Sorry to hear that 💙 Would you like to stay in that mood or feel better?"
+            st.session_state.response = f"{random.choice(negative_responses)}\n{random.choice(intent_prompts)}"
             st.session_state.step = 'intent'
 
     elif st.session_state.step == 'intent':
@@ -54,7 +92,7 @@ def handle_input():
             st.session_state.general_mood = 'positive'
         elif any(word in user_input.lower() for word in ['stick', 'stay', 'keep']):
             st.session_state.general_mood = 'negative'
-        st.session_state.response = "Got it. What are you doing right now?"
+        st.session_state.response = random.choice(activity_prompts)
         st.session_state.step = 'activity'
 
     elif st.session_state.step == 'activity':
@@ -72,12 +110,12 @@ def handle_input():
             st.session_state.special_used = True
         elif 'another' in user_input.lower():
             st.session_state.step = 'mood'
-            st.session_state.response = "Okay! How are you feeling now?"
+            st.session_state.response = "Let’s try again! What’s your mood now?"
         elif 'exit' in user_input.lower():
             st.session_state.response = "Goodbye! Thanks for chatting 🎵"
             st.session_state.step = 'done'
         else:
-            st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
+            st.session_state.response = random.choice(retry_prompts)
 
     # Clear input field
     st.session_state.styledinput = ""
