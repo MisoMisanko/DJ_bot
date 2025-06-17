@@ -34,14 +34,17 @@ class DJBot:
         emotions = processed_input["emotions"]
         general_mood = processed_input["general_mood"]
 
-        if context:
-            query = f"{general_mood} {context}"
+        # === Construct query ===
+        if emotions:
+            primary_emotion = emotions[0]  # use first detected emotion
+            query = f"{primary_emotion} {context}" if context else primary_emotion
         elif general_mood == "negative" and not context:
-            query = "sad relaxing music" #I had to add this, because the search often failed when I provided only "negative" with no context
+            query = "sad relaxing music"
         else:
-            query = general_mood
+            query = f"{general_mood} {context}" if context else general_mood
 
         playlist = self.search_playlist(query)
+
         if playlist:
             responses = [
                 f"This feels just right for your vibe. Here’s your playlist: {playlist}",
