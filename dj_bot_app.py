@@ -51,7 +51,7 @@ emotion_responses = {
     ],
     "sad": [
         "I'm sorry you're feeling down. 💙",
-        "Let's find something to match or uplift your mood. 😔",
+        "Let’s find something to match or uplift your mood. 😔",
         "I’m here with you. 💫"
     ],
     "angry": [
@@ -77,7 +77,7 @@ def handle_input():
     if not user_input:
         return
 
-    # --- Special commands available globally ---
+    # --- Special commands ---
     if user_input == "special" and not st.session_state.special_used:
         st.session_state.response = f"Here’s something truly special I’ve curated just for you: {bot.mini_spotify_wrapped()}"
         st.session_state.special_used = True
@@ -90,7 +90,7 @@ def handle_input():
         st.session_state.styledinput = ""
         return
 
-    # --- Conversation flow ---
+    # === Chat Logic ===
     if st.session_state.step == 'mood':
         processed = bot.process_input(user_input)
         st.session_state.general_mood = processed["general_mood"]
@@ -98,7 +98,21 @@ def handle_input():
 
         mood_key = st.session_state.emotions[0] if st.session_state.emotions else "default"
         mood_message = random.choice(emotion_responses.get(mood_key, emotion_responses["default"]))
-        st.session_state.response = f"{mood_message} What are you doing right now?"
+
+        # If sad, add follow-up step
+        if mood_key == "sad":
+            st.session_state.response = f"{mood_message} Would you like to stay in this mood or feel better?"
+            st.session_state.step = "intent"
+        else:
+            st.session_state.response = f"{mood_message} What are you doing right now?"
+            st.session_state.step = 'activity'
+
+    elif st.session_state.step == 'intent':
+        if any(word in user_input for word in ["uplift", "better", "happy", "improve", "change"]):
+            st.session_state.general_mood = "positive"
+        elif any(word in user_input for word in ["stick", "keep", "stay", "same"]):
+            st.session_state.general_mood = "negative"
+        st.session_state.response = "Got it. What are you doing right now?"
         st.session_state.step = 'activity'
 
     elif st.session_state.step == 'activity':
@@ -108,8 +122,11 @@ def handle_input():
             "emotions": st.session_state.emotions
         }, context=st.session_state.context)
 
-        followup = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
-        st.session_state.response = f"{playlist}\n\n{followup}"
+        upsell = (
+            "Would you like to try another playlist, exit, or curate a special playlist just for you? "
+            "Type 'another', 'special', or 'exit'."
+        )
+        st.session_state.response = f"{playlist}\n\n{upsell}"
         st.session_state.step = 'post_playlist'
 
     elif st.session_state.step == 'post_playlist':
@@ -125,7 +142,7 @@ def handle_input():
         else:
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
-    # --- Clear input field ---
+    # === Clear input ===
     st.session_state.styledinput = ""
 
 # === UI ===
