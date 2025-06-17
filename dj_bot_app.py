@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import pathlib
 from dj_bot import DJBot
 
 # === Spotify credentials ===
@@ -22,35 +23,15 @@ if 'step' not in st.session_state:
 if "input" not in st.session_state:
     st.session_state.input = ""
 
-# === Style (linked to key="styledinput" and key="sendbutton") ===
-st.markdown("""
-<style>
-/* Input field styling */
-.st-key-styledinput input {
-    background-color: #f5f5f5;
-    color: #000000;
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-}
+def load_css(css_file):
+    css_path = pathlib.Path(css_file)
+    if css_path.exists():
+        with open(css_path) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    else:
+        st.warning("⚠️ CSS file not found.")
 
-/* Markdown output */
-div[data-testid="stMarkdownContainer"] {
-    font-size: 16px;
-    line-height: 1.6;
-}
-
-/* Button styling (not used here but ready if added later) */
-.st-key-sendbutton button {
-    background-color: #1DB954;
-    color: white;
-    font-weight: bold;
-    border-radius: 6px;
-    padding: 8px 20px;
-}
-</style>
-""", unsafe_allow_html=True)
+load_css("assets/styles.css")
 
 # === Title ===
 st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
@@ -58,7 +39,7 @@ st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 # === Logic handler ===
 
 def handle_input():
-    user_input = st.session_state.styledinput
+    user_input = st.session_state.styledinput = ""
     if not user_input:
         return
 
