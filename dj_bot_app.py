@@ -1,7 +1,8 @@
 import streamlit as st
-from dj_bot import DJBot
-from dotenv import load_dotenv
 import os
+client_id = os.environ["SPOTIPY_CLIENT_ID"]
+client_secret = os.environ["SPOTIPY_CLIENT_SECRET"]
+
 
 # Load secrets
 load_dotenv()
