@@ -56,8 +56,9 @@ div[data-testid="stMarkdownContainer"] {
 st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 
 # === Logic handler ===
+
 def handle_input():
-    user_input = st.session_state.input.strip()
+    user_input = st.session_state.styledinput
     if not user_input:
         return
 
@@ -108,7 +109,7 @@ def handle_input():
     st.session_state.input = ""
 
 # === Input field ===
-st.text_input("You:", key="input", label_visibility="collapsed", on_change=handle_input, key="styledinput")
+st.text_input("You:", label_visibility="collapsed", on_change=handle_input, key="styledinput")
 
 # === Output ===
 if st.session_state.response:
