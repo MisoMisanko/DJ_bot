@@ -87,7 +87,7 @@ def handle_input():
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
     # Clear input after handling
-    st.session_state.styledinput = ""
+    st.session_state["styledinput"] = ""
 
 # === Input field ===
 with st.form("chat_form", clear_on_submit=True):
