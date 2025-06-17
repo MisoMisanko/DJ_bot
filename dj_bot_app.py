@@ -39,7 +39,7 @@ st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 # === Logic handler ===
 
 def handle_input():
-    user_input = st.session_state.styledinput = ""
+    user_input = st.session_state.styledinput
     if not user_input:
         return
 
@@ -87,7 +87,7 @@ def handle_input():
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
     # Clear input after handling
-    st.session_state.input = ""
+    st.session_state.styledinput = ""
 
 # === Input field ===
 st.text_input("You:", label_visibility="collapsed", on_change=handle_input, key="styledinput")
