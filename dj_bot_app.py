@@ -21,6 +21,7 @@ if 'step' not in st.session_state:
 
 st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 
+# Custom styling
 st.markdown(
     """
     <style>
@@ -95,8 +96,9 @@ if submitted and user_input:
         else:
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
-    # ✅ Clear input after processing
-    st.session_state.input = ""
+    # ✅ Safely clear the input box after submission
+    if "input" in st.session_state:
+        st.session_state.input = ""
 
 # Show bot response
 if st.session_state.response:
