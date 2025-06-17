@@ -2,14 +2,21 @@ import streamlit as st
 import os
 from dj_bot import DJBot
 
-# Load Spotify credentials from Streamlit secrets
+# Load CSS
+def load_css(file_path):
+    with open(file_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_css("dj_style.css")
+
+# Load Spotify credentials from secrets
 client_id = os.environ["SPOTIPY_CLIENT_ID"]
 client_secret = os.environ["SPOTIPY_CLIENT_SECRET"]
 
 # Init bot
 bot = DJBot(client_id=client_id, client_secret=client_secret)
 
-# Session state setup
+# Setup session state
 if 'step' not in st.session_state:
     st.session_state.step = 'mood'
     st.session_state.mood = ''
@@ -22,40 +29,16 @@ if 'step' not in st.session_state:
 if "input" not in st.session_state:
     st.session_state.input = ""
 
-# Title and styling
+# Title
 st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 
-st.markdown(
-    """
-    <style>
-    .stTextInput > div > div > input {
-        background-color: #f5f5f5;
-        color: #000000;
-        padding: 10px;
-        border-radius: 8px;
-    }
-    div[data-testid="stMarkdownContainer"] {
-        font-size: 16px;
-        line-height: 1.6;
-    }
-    button[kind="primary"] {
-        background-color: #1DB954;
-        color: white;
-        font-weight: bold;
-        border-radius: 6px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# Input form with button
+with st.form("chat_form"):
+    user_input = st.text_input("You:", value=st.session_state.input, label_visibility="collapsed")
+    submitted = st.form_submit_button("Send")
 
-# Conversation handler
-def handle_input():
-    user_input = st.session_state.input.strip()
-
-    if not user_input:
-        return
-
+# Process input if submitted
+def handle_input(user_input):
     if st.session_state.step == 'mood':
         processed = bot.process_input(user_input)
         st.session_state.general_mood = processed["general_mood"]
@@ -99,11 +82,10 @@ def handle_input():
         else:
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
-    # Clear the input box
+# Run it if submitted
+if submitted and user_input.strip():
+    handle_input(user_input.strip())
     st.session_state.input = ""
-
-# Input field with callback
-st.text_input("You:", key="input", label_visibility="collapsed", on_change=handle_input)
 
 # Show bot response
 if st.session_state.response:
