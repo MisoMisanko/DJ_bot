@@ -90,7 +90,13 @@ def handle_input():
     st.session_state.styledinput = ""
 
 # === Input field ===
-st.text_input("You:", label_visibility="collapsed", on_change=handle_input, key="styledinput")
+with st.form("chat_form", clear_on_submit=True):
+    st.text_input("You:", label_visibility="collapsed", key="styledinput")
+    submitted = st.form_submit_button("Send")
+
+if submitted:
+    handle_input()
+
 
 # === Output ===
 if st.session_state.response:
