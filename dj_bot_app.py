@@ -32,42 +32,44 @@ if 'step' not in st.session_state:
 if "styledinput" not in st.session_state:
     st.session_state.styledinput = ""
 
-# === Helper prompt variations ===
-positive_responses = [
-    "That’s great to hear! 😄",
-    "Amazing! I’m so happy for you! 🥳",
-    "Fantastic! Let’s keep the good vibes rolling! ✨"
-]
-
-activity_prompts = [
-    "What are you up to right now? Relaxing, working out, or something else?",
-    "What’s on your schedule? Chilling, exercising, or anything else?",
-    "What are you doing at the moment? Taking it easy, hitting the gym, or something else?"
-]
-
-negative_responses = [
-    "I’m sorry to hear that. 😔",
-    "Oh no, that sounds rough. 💔",
-    "I’m here for you. Let’s make it better. 🌧️"
-]
-
-intent_prompts = [
-    "Should we stick with this mood or try to brighten things up?",
-    "Do you want to stay in this feeling or find something uplifting?",
-    "Would you prefer to keep this vibe or try to turn it around?"
-]
-
-another_prompts = [
-    "Want to explore another playlist, or check out something special I’ve curated just for you?",
-    "Would you like another playlist, or something unique I’ve crafted especially for you?",
-    "Ready for another playlist, or want to see something truly special?"
-]
-
-retry_prompts = [
-    "Type 'another' for a new playlist, 'special' for your special one, or 'exit'.",
-    "Let me know if you want 'another', something 'special', or just 'exit'.",
-    "Need more music? Say 'another', 'special', or 'exit'."
-]
+# === Mood reaction prompts ===
+mood_responses = {
+    "happy": [
+        "That’s wonderful to hear! 😄",
+        "Yay! That made my circuits smile! 😊",
+        "You’ve got the vibes today! ✨"
+    ],
+    "excited": [
+        "Whoa! That’s the spirit! 🎉",
+        "I can feel your energy through the screen! ⚡",
+        "Let’s ride this wave of hype together! 🚀"
+    ],
+    "calm": [
+        "Nice and chill — I like it. 🌿",
+        "Peaceful vibes detected. 🧘",
+        "Floating on calm waters, huh? 🛶"
+    ],
+    "sad": [
+        "I’m really sorry you’re feeling that way. 💙",
+        "Let’s find something that understands you. 😔",
+        "Even when it’s rough, I’m here with tunes. 🎧"
+    ],
+    "angry": [
+        "Yikes — sounds intense. 💢",
+        "Want a playlist to scream into the void? 🔊",
+        "Let’s redirect that fire with some fierce beats. 🔥"
+    ],
+    "stressed": [
+        "Let’s breathe together. Deep in… deep out. 😮‍💨",
+        "I’ve got just the thing to calm the storm. 🌪️",
+        "Stress? Music might help soothe it. 🎶"
+    ],
+    "fallback": [
+        "That’s an interesting mood. I’ll work with it. 🤔",
+        "Whatever you’re feeling, I’ve got your back. 🤖",
+        "Not sure how to label that — let’s find the right vibe anyway. 💫"
+    ]
+}
 
 # === Logic handler ===
 def handle_input():
@@ -80,20 +82,11 @@ def handle_input():
         st.session_state.general_mood = processed["general_mood"]
         st.session_state.emotions = processed["emotions"]
 
-        if st.session_state.general_mood == "positive":
-            st.session_state.response = f"{random.choice(positive_responses)}\n{random.choice(activity_prompts)}"
-            st.session_state.step = 'activity'
-        else:
-            st.session_state.response = f"{random.choice(negative_responses)}\n{random.choice(intent_prompts)}"
-            st.session_state.step = 'intent'
+        mood = st.session_state.emotions[0] if st.session_state.emotions else "fallback"
+        reaction = random.choice(mood_responses.get(mood, mood_responses["fallback"]))
 
-    elif st.session_state.step == 'intent':
-        if any(word in user_input.lower() for word in ['uplift', 'change', 'better', 'happy']):
-            st.session_state.general_mood = 'positive'
-        elif any(word in user_input.lower() for word in ['stick', 'stay', 'keep']):
-            st.session_state.general_mood = 'negative'
-        st.session_state.response = random.choice(activity_prompts)
-        st.session_state.step = 'activity'
+        st.session_state.response = f"{reaction} What are you doing right now?"
+        st.session_state.step = 'activity' if mood != 'fallback' else 'post_playlist_prep'
 
     elif st.session_state.step == 'activity':
         st.session_state.context = user_input
@@ -101,7 +94,9 @@ def handle_input():
             "general_mood": st.session_state.general_mood,
             "emotions": st.session_state.emotions
         }, context=st.session_state.context)
-        st.session_state.response = reply
+
+        upsell = "\n\nWant to explore another playlist, check out something special I’ve curated just for you, or exit?"
+        st.session_state.response = reply + upsell
         st.session_state.step = 'post_playlist'
 
     elif st.session_state.step == 'post_playlist':
@@ -110,12 +105,12 @@ def handle_input():
             st.session_state.special_used = True
         elif 'another' in user_input.lower():
             st.session_state.step = 'mood'
-            st.session_state.response = "Let’s try again! What’s your mood now?"
+            st.session_state.response = "Okay! How are you feeling now?"
         elif 'exit' in user_input.lower():
             st.session_state.response = "Goodbye! Thanks for chatting 🎵"
             st.session_state.step = 'done'
         else:
-            st.session_state.response = random.choice(retry_prompts)
+            st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
     # Clear input field
     st.session_state.styledinput = ""
