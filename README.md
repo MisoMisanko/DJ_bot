@@ -89,9 +89,13 @@ A working `.env` file or exported credentials (or via Streamlit secrets) must be
 
 > *If you are reviewing the project for assessment, my credentials are included in the submitted zip archive.*
 
+✅ You can also test the chatbot live on my portfolio:  
+[https://www.misomisanko.com](https://www.misomisanko.com)
+
+ENJOY :)
 ---
 
 ## ✅ Final Touches
-- All styling is synced with my personal portfolio (typography, layout, color).
-- Font is overridden to `Helvetica Neue` using custom CSS.
-- Streamlit app uses scoped CSS and class-based selectors.
+- Some UI elements are custom styled using `styles.css`
+- Streamlit layout is compact and mobile-friendly
+- Includes emoji-enhanced dialogue and playlist logic for engagement
