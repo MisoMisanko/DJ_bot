@@ -1,22 +1,24 @@
 import streamlit as st
 import os
+import pathlib
 from dj_bot import DJBot
 
-# Load CSS
-def load_css(file_path):
-    with open(file_path) as f:
+# === Load external CSS ===
+def load_css(css_file):
+    with open(css_file) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-load_css("dj_style.css")
+css_path = pathlib.Path("assets/styles.css")
+load_css(css_path)
 
-# Spotify credentials
+# === Load credentials ===
 client_id = os.environ["SPOTIPY_CLIENT_ID"]
 client_secret = os.environ["SPOTIPY_CLIENT_SECRET"]
 
-# Init bot
+# === Init bot ===
 bot = DJBot(client_id=client_id, client_secret=client_secret)
 
-# Session state setup
+# === State setup ===
 if 'step' not in st.session_state:
     st.session_state.step = 'mood'
     st.session_state.response = "Hey! I’m DJ Bot. How are you feeling today? 🎧"
@@ -27,15 +29,15 @@ if 'step' not in st.session_state:
 if "input" not in st.session_state:
     st.session_state.input = ""
 
-# Title
+# === Title ===
 st.title("🎧 DJ Bot – Your Mood-Based Music Companion")
 
-# Input + Send button (form)
+# === Input form ===
 with st.form("chat_form"):
-    user_input = st.text_input("You:", value=st.session_state.input, label_visibility="collapsed")
-    submitted = st.form_submit_button("Send")
+    st.text_input("You:", value=st.session_state.input, label_visibility="collapsed", key="styledinput")
+    submitted = st.form_submit_button("Send", use_container_width=False, key="sendbutton")
 
-# Handle logic
+# === Handle logic ===
 def handle_input(text):
     if st.session_state.step == 'mood':
         processed = bot.process_input(text)
@@ -78,11 +80,11 @@ def handle_input(text):
         else:
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
 
-# Process input if submitted
-if submitted and user_input.strip():
-    handle_input(user_input.strip())
+# === Execute ===
+if submitted and st.session_state.input.strip():
+    handle_input(st.session_state.input.strip())
     st.session_state.input = ""
 
-# Show bot response
+# === Show reply ===
 if st.session_state.response:
     st.markdown(f"**DJ Bot:** {st.session_state.response}")
