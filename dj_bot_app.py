@@ -2,6 +2,7 @@ import streamlit as st
 import os
 from dj_bot import DJBot
 
+# Load Spotify credentials from Streamlit secrets
 client_id = os.environ["SPOTIPY_CLIENT_ID"]
 client_secret = os.environ["SPOTIPY_CLIENT_SECRET"]
 
@@ -43,8 +44,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-
 
 # User Input Form
 with st.form("chat_form"):
@@ -95,6 +94,9 @@ if submitted and user_input:
             st.session_state.step = 'done'
         else:
             st.session_state.response = "Type 'another' for a new playlist, 'special' for your special one, or 'exit'."
+
+    # ✅ Clear input after processing
+    st.session_state.input = ""
 
 # Show bot response
 if st.session_state.response:
