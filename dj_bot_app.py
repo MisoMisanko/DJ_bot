@@ -3,12 +3,6 @@ import os
 client_id = os.environ["SPOTIPY_CLIENT_ID"]
 client_secret = os.environ["SPOTIPY_CLIENT_SECRET"]
 
-
-# Load secrets
-load_dotenv()
-client_id = os.getenv("SPOTIPY_CLIENT_ID")
-client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
-
 # Init bot
 bot = DJBot(client_id=client_id, client_secret=client_secret)
 
