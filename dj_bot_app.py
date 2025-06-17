@@ -108,7 +108,7 @@ def handle_input():
     st.session_state.input = ""
 
 # === Input field ===
-st.text_input("You:", key="input", label_visibility="collapsed", on_change=handle_input, key="styledinput")
+st.text_input("You:", label_visibility="collapsed", on_change=handle_input, key="styledinput")
 
 # === Output ===
 if st.session_state.response:
